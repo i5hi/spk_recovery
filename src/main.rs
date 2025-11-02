@@ -87,7 +87,7 @@ fn main() {
         .expect("The descriptor needs a multipath")
         .clone();
 
-    let mut client = bwk_electrum::client::Client::new(&args.ip, args.port).unwrap();
+    let mut client = bwk_electrum::client::Client::new_local(&args.ip, args.port).unwrap();
     let (mut sender, mut receiver) = client.listen();
 
     // List funded spks
@@ -103,7 +103,7 @@ fn main() {
         if i % args.max == 0 {
             println!("New client");
 
-            client = bwk_electrum::client::Client::new(&args.ip, args.port).unwrap();
+            client = bwk_electrum::client::Client::new_local(&args.ip, args.port).unwrap();
             (sender, receiver) = client.listen();
         }
 
@@ -156,7 +156,7 @@ fn main() {
     }
 
     // create a new client so we dont get random notif from subscriptions
-    client = bwk_electrum::client::Client::new(&args.ip, args.port).unwrap();
+    client = bwk_electrum::client::Client::new_local(&args.ip, args.port).unwrap();
     (sender, receiver) = client.listen();
 
     // Fetch all txs
