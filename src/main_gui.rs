@@ -356,12 +356,21 @@ impl WalletApp {
         let logs_section = self.build_logs_section();
         let sign_section = self.build_sign_section();
 
+        let footer = text("by developers at Bull & Liana")
+            .size(11)
+            .font(GOLOS_TEXT)
+            .width(Length::Fill)
+            .align_x(alignment::Horizontal::Center)
+            .color(styles::TEXT_MUTED);
+
         let content = column![
             header,
             config_section,
             logs_section,
             sign_section,
             Space::with_height(20),
+            footer,
+            Space::with_height(8),
         ]
         .spacing(20)
         .padding(Padding::new(24.0))
@@ -557,7 +566,14 @@ impl WalletApp {
         if let Some(psbt_str) = psbt_str_for_decode {
             let mut summary_col = Column::new().spacing(6);
 
-            if let Some((outputs, fees)) = decode_psbt_outputs(psbt_str) {
+            if let Some((outputs, fees, inputs_count)) = decode_psbt_outputs(psbt_str) {
+                summary_col = summary_col.push(
+                    row![
+                        text("Inputs:").width(Length::Fixed(60.0)).font(GOLOS_TEXT).size(13).color(styles::GREY_DARK),
+                        text(format!("{}", inputs_count)).font(GOLOS_TEXT).size(13).color(styles::TEXT),
+                    ].spacing(12)
+                );
+                summary_col = summary_col.push(Space::with_height(4));
                 summary_col = summary_col.push(
                     text("Outputs").size(14).font(GOLOS_TEXT).color(styles::GREY_DARK)
                 );
@@ -574,7 +590,7 @@ impl WalletApp {
                     summary_col = summary_col.push(Space::with_height(4));
                     summary_col = summary_col.push(
                         row![
-                            text("Fees:").width(Length::Fixed(50.0)).font(GOLOS_TEXT).size(13).color(styles::GREY_DARK),
+                            text("Fees:").width(Length::Fixed(60.0)).font(GOLOS_TEXT).size(13).color(styles::GREY_DARK),
                             text(format!("{} sats", fee_sats)).font(GOLOS_TEXT).size(13).color(styles::TEXT),
                         ].spacing(12)
                     );
@@ -745,12 +761,13 @@ impl WalletApp {
 
 }
 
-fn decode_psbt_outputs(psbt_str: &str) -> Option<(Vec<(String, u64)>, Option<u64>)> {
+fn decode_psbt_outputs(psbt_str: &str) -> Option<(Vec<(String, u64)>, Option<u64>, usize)> {
     use std::str::FromStr;
     use miniscript::bitcoin::{Psbt, Network, Address};
 
     let psbt = Psbt::from_str(psbt_str.trim()).ok()?;
 
+    let inputs_count = psbt.inputs.len();
     let outputs: Vec<(String, u64)> = psbt.unsigned_tx.output.iter().map(|o| {
         let addr = Address::from_script(&o.script_pubkey, Network::Bitcoin)
             .map(|a| a.to_string())
@@ -764,7 +781,7 @@ fn decode_psbt_outputs(psbt_str: &str) -> Option<(Vec<(String, u64)>, Option<u64
     let total_out: u64 = psbt.unsigned_tx.output.iter().map(|o| o.value.to_sat()).sum();
     let fees = total_in.map(|ti| ti.saturating_sub(total_out));
 
-    Some((outputs, fees))
+    Some((outputs, fees, inputs_count))
 }
 
 fn format_descriptor(s: &str) -> String {

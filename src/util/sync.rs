@@ -11,7 +11,7 @@ use bwk_electrum::client::{CoinRequest, CoinResponse};
 use miniscript::{
     bitcoin::{
         absolute,
-        psbt::{Input, Output},
+        psbt::Input,
         transaction::Version,
         Address, Amount, Network, OutPoint, Psbt, ScriptBuf, Sequence, Transaction, TxIn, TxOut,
         Txid, Witness,
@@ -135,6 +135,8 @@ pub fn sync_wallet(
     }
 
     let _ = log_tx.send(format!("Scan complete. Found {} total outputs", funded_spks.len()));
+    let _ = log_tx.send("STATUS:Building Transaction".to_string());
+    let _ = log_tx.send("Fetching transactions and building PSBT...".to_string());
 
     client = bwk_electrum::client::Client::new_local(&ip, port)
         .map_err(|e| format!("Failed to reconnect: {:?}", e))?;
@@ -200,7 +202,6 @@ pub fn sync_wallet(
     };
 
     let mut psbt = Psbt::from_unsigned_tx(tx).map_err(|e| format!("PSBT error: {}", e))?;
-    psbt.outputs.push(Output::default());
 
     let mut sum_inputs = Amount::ZERO;
     for (pos, coin) in unspent_coins.into_iter().enumerate() {
