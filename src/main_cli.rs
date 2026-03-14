@@ -27,10 +27,6 @@ struct Args {
     /// Address where the coins will be spent
     address: String,
 
-    #[arg(short, long, default_value = "20000")]
-    /// Max subscription accepted by the server for each connection
-    max: u32,
-
     #[arg(short, long, default_value = "10000")]
     /// Batch size - how many spk we ask for each request
     batch: u32,
@@ -61,7 +57,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         args.port.to_string(),
         args.target.to_string(),
         args.address,
-        args.max.to_string(),
         args.batch.to_string(),
         args.fee.to_string(),
         log_tx,

@@ -26,8 +26,6 @@ chmod +x spk_recovery
 ./spk_recovery
 ```
 
-> On first launch macOS may block the binary. Go to **System Settings → Privacy & Security** and click **Open Anyway**.
-
 ### macOS (Intel)
 
 ```bash
@@ -35,6 +33,20 @@ tar -xzf spk_recovery-macos-x86_64.tar.gz
 chmod +x spk_recovery
 ./spk_recovery
 ```
+
+### macOS: Gatekeeper Warning
+
+Because this app is distributed via GitHub and not the Apple App Store, macOS Gatekeeper will block it on first launch. This is expected for any open-source app not signed with an Apple developer certificate. The app is safe to run — you can review the full source code in this repository.
+
+**Step 1:** Try to open the app. macOS will block it. Open **System Settings → Privacy & Security**, scroll to the **Security** section, and click **Open Anyway**.
+
+![macOS Privacy & Security — Open Anyway](docs/macos-gatekeeper.png)
+
+**Step 2:** A confirmation dialog will appear. Click **Open Anyway** (not "Move to Bin").
+
+![macOS Open Anyway dialog](docs/macos-gatekeeper-dialog.png)
+
+After this, the app will open normally on all future launches.
 
 ### Linux (x86_64)
 
@@ -91,6 +103,10 @@ The Bitcoin address where **all** recovered funds will be sent. Make sure this i
 ### 5. Fee Rate
 
 Satoshis per virtual byte. Check [mempool.space](https://mempool.space) for current rates. `1` sat/vB is fine for non-urgent sweeps.
+
+![SPK Recovery Tool — Sync Config](docs/app-screenshot.png)
+
+The three fields you'll need to fill in are **Descriptor**, **Destination Address**, and **Target Index** if your gap is larger than the default. Everything else can stay as-is.
 
 ### 6. Sync & Create PSBT
 

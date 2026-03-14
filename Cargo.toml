@@ -2,6 +2,7 @@
 name = "spk_recovery"
 version = "0.0.1"
 edition = "2021"
+license = "MIT"
 
 [dependencies]
 bip39 = "2.0.0"

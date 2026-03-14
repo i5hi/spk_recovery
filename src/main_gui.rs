@@ -22,7 +22,6 @@ enum Message {
     PortChanged(String),
     TargetChanged(String),
     AddressChanged(String),
-    MaxChanged(String),
     BatchChanged(String),
     FeeChanged(String),
     MnemonicChanged(String),
@@ -47,7 +46,6 @@ struct WalletApp {
     port: String,
     target: String,
     address: String,
-    max: String,
     batch: String,
     fee: String,
     mnemonic: String,
@@ -73,7 +71,6 @@ impl Default for WalletApp {
             port: String::from("50002"),
             target: String::from("10000"),
             address: String::new(),
-            max: String::from("20000"),
             batch: String::from("10000"),
             fee: String::from("1"),
             mnemonic: String::new(),
@@ -117,7 +114,6 @@ impl WalletApp {
             Message::PortChanged(value) => { self.port = value; Task::none() }
             Message::TargetChanged(value) => { self.target = value; Task::none() }
             Message::AddressChanged(value) => { self.address = value; Task::none() }
-            Message::MaxChanged(value) => { self.max = value; Task::none() }
             Message::BatchChanged(value) => { self.batch = value; Task::none() }
             Message::FeeChanged(value) => { self.fee = value; Task::none() }
             Message::MnemonicChanged(value) => { self.mnemonic = value; Task::none() }
@@ -142,7 +138,6 @@ impl WalletApp {
                 let _ = log_tx.send(format!("=== Configuration ==="));
                 let _ = log_tx.send(format!("Electrum: {}:{}", self.ip, self.port));
                 let _ = log_tx.send(format!("Target index: {}", self.target));
-                let _ = log_tx.send(format!("Max subscriptions: {}", self.max));
                 let _ = log_tx.send(format!("Batch size: {}", self.batch));
                 let _ = log_tx.send(format!("Fee rate: {} sat/vB", self.fee));
                 let _ = log_tx.send(format!("==================="));
@@ -152,14 +147,13 @@ impl WalletApp {
                 let port = self.port.clone();
                 let target = self.target.clone();
                 let address = self.address.clone();
-                let max = self.max.clone();
                 let batch = self.batch.clone();
                 let fee = self.fee.clone();
 
                 Task::perform(
                     async move {
                         tokio::task::spawn_blocking(move || {
-                            sync_wallet(descriptor, ip, port, target, address, max, batch, fee, log_tx)
+                            sync_wallet(descriptor, ip, port, target, address, batch, fee, log_tx)
                         })
                         .await
                         .map_err(|e| format!("Task error: {}", e))?
@@ -430,18 +424,9 @@ impl WalletApp {
                     .text_size(14),
             ].spacing(12).align_y(alignment::Vertical::Center),
             row![
-                text("Electrum IP:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
-                text_input("ssl://fulcrum.bullbitcoin.com", &self.ip)
-                    .on_input(Message::IpChanged)
-                    .width(Length::Fill)
-                    .font(GOLOS_TEXT)
-                    .padding(10)
-                    .style(|_theme, status| styles::styled_text_input(status)),
-            ].spacing(12).align_y(alignment::Vertical::Center),
-            row![
-                text("Electrum Port:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
-                text_input("50002", &self.port)
-                    .on_input(Message::PortChanged)
+                text("Destination Address:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
+                text_input("Bitcoin address", &self.address)
+                    .on_input(Message::AddressChanged)
                     .width(Length::Fill)
                     .font(GOLOS_TEXT)
                     .padding(10)
@@ -457,18 +442,18 @@ impl WalletApp {
                     .style(|_theme, status| styles::styled_text_input(status)),
             ].spacing(12).align_y(alignment::Vertical::Center),
             row![
-                text("Destination Address:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
-                text_input("Bitcoin address", &self.address)
-                    .on_input(Message::AddressChanged)
+                text("Electrum IP:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
+                text_input("ssl://fulcrum.bullbitcoin.com", &self.ip)
+                    .on_input(Message::IpChanged)
                     .width(Length::Fill)
                     .font(GOLOS_TEXT)
                     .padding(10)
                     .style(|_theme, status| styles::styled_text_input(status)),
             ].spacing(12).align_y(alignment::Vertical::Center),
             row![
-                text("Max Subscriptions:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
-                text_input("20000", &self.max)
-                    .on_input(Message::MaxChanged)
+                text("Electrum Port:").width(label_width).font(GOLOS_TEXT).color(styles::GREY_DARK),
+                text_input("50002", &self.port)
+                    .on_input(Message::PortChanged)
                     .width(Length::Fill)
                     .font(GOLOS_TEXT)
                     .padding(10)

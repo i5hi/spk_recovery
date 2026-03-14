@@ -31,18 +31,16 @@ pub fn sync_wallet(
     port: String,
     target: String,
     address: String,
-    max: String,
     batch: String,
     fee: String,
     log_tx: LogSender<String>,
 ) -> Result<SyncResult, String> {
     let target: u32 = target.parse().map_err(|e| format!("Invalid target: {}", e))?;
-    let mut max: u32 = max.parse().map_err(|e| format!("Invalid max: {}", e))?;
     let batch: u32 = batch.parse().map_err(|e| format!("Invalid batch: {}", e))?;
     let fee: u64 = fee.parse().map_err(|e| format!("Invalid fee: {}", e))?;
     let port: u16 = port.parse().map_err(|e| format!("Invalid port: {}", e))?;
 
-    max /= 2;
+    let max = batch * 2;
 
     let address = Address::from_str(&address)
         .map_err(|e| format!("Invalid address: {}", e))?;
